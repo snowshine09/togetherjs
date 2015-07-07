@@ -1,12 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
- // this part is what I write: trying to connect MongoDB
- var configDB = require('./db.js'), 
- mongoose = require('mongoose');
- // mongoose.createConnection(configDB.url);
- // mongoose.connect(configDB.url);
- var Chatmsg = require('./models/chatmsg.js');
 
 // New Relic Server monitoring support
 if ( process.env.NEW_RELIC_HOME ) {
@@ -19,8 +13,8 @@ var EMPTY_ROOM_LOG_TIMEOUT = 3*60*1000; // 3 minutes
 var WEBSOCKET_COMPAT = true;
 
 var WebSocketServer = WEBSOCKET_COMPAT ?
-require("./websocket-compat").server :
-require("websocket").server;
+  require("./websocket-compat").server :
+  require("websocket").server;
 var http = require('http');
 var parseUrl = require('url').parse;
 var fs = require('fs');
@@ -38,9 +32,9 @@ var fs = require('fs');
 // Stats are at level 2
 
 var thisSource = "// What follows is the source for the server.\n" +
-"// Obviously we can't prove this is the actual source, but if it isn't then we're \n" +
-"// a bunch of lying liars, so at least you have us on record.\n\n" +
-fs.readFileSync(__filename);
+    "// Obviously we can't prove this is the actual source, but if it isn't then we're \n" +
+    "// a bunch of lying liars, so at least you have us on record.\n\n" +
+    fs.readFileSync(__filename);
 
 var Logger = function (level, filename, stdout) {
   this.level = level;
@@ -117,9 +111,9 @@ var server = http.createServer(function(request, response) {
     var load = getLoad();
     response.writeHead(200, {"Content-Type": "text/plain"});
     response.end("OK " + load.connections + " connections " +
-     load.sessions + " sessions; " +
-     load.solo + " are single-user and " +
-     (load.sessions - load.solo) + " active sessions");
+                 load.sessions + " sessions; " +
+                 load.solo + " are single-user and " +
+                 (load.sessions - load.solo) + " active sessions");
   } else if (url.pathname == '/server-source') {
     response.writeHead(200, {"Content-Type": "text/plain"});
     response.end(thisSource);
@@ -220,7 +214,7 @@ function startServer(port, host) {
 }
 
 var wsServer = new WebSocketServer({
-  httpServer: server,
+    httpServer: server,
     // 10Mb max size (1Mb is default, maybe this bump is unnecessary)
     maxReceivedMessageSize: 0x1000000,
     // The browser doesn't seem to break things up into frames (not sure what this means)
@@ -229,7 +223,7 @@ var wsServer = new WebSocketServer({
     // Using autoaccept because the origin is somewhat dynamic
     // FIXME: make this smarter?
     autoAcceptConnections: false
-  });
+});
 
 function originIsAllowed(origin) {
   // Unfortunately the origin will be whatever page you are sharing,
@@ -287,26 +281,6 @@ wsServer.on('request', function(request) {
     var parsed;
     try {
       parsed = JSON.parse(message.utf8Data);
-      var tempstr = '';
-      for(key in message){
-        console.log('message key is '+key+', and message is '+message[key]);
-      }
-      if(parsed.type === "chat") {
-        console.log('this is when message.utf8Data is chat type');
-        var new_msg = new Chatmsg();
-        new_msg.text = parsed.text;
-        // new_msg._id = parsed.messageId;
-        new_msg.clientId = parsed.clientId;
-        new_msg.topic = parsed.topic;
-        new_msg.username = parsed.username;
-        new_msg.save(function(err){
-          if(err) throw err;
-          else console.log('sucessfully saved chat!');
-        });
-        console.log('out of chat saving');
-      }
-      // logger.warn('try sending somthing using logger '+message.utf8Data);
-      // console.log('now console'+message[0]);
     } catch (e) {
       logger.warn('Error parsing JSON: ' + JSON.stringify(message.utf8Data) + ": " + e);
       return;
@@ -324,9 +298,9 @@ wsServer.on('request', function(request) {
     connectionStats[id].totalMessageChars += message.utf8Data.length;
     connectionStats[id].totalMessages++;
     logger.debug('Message on ' + id + ' bytes: ' +
-     (message.utf8Data && message.utf8Data.length) +
-     ' conn ID: ' + connection.ID + ' data:' + message.utf8Data.substr(0, 20) +
-     ' connections: ' + allConnections[id].length);
+                 (message.utf8Data && message.utf8Data.length) +
+                 ' conn ID: ' + connection.ID + ' data:' + message.utf8Data.substr(0, 20) +
+                 ' connections: ' + allConnections[id].length);
     for (var i=0; i<allConnections[id].length; i++) {
       var c = allConnections[id][i];
       if (c == connection && !parsed["server-echo"]) {
@@ -339,8 +313,8 @@ wsServer.on('request', function(request) {
       }
     }
   });
-connection.on('close', function(reasonCode, description) {
-  if (! allConnections[id]) {
+  connection.on('close', function(reasonCode, description) {
+    if (! allConnections[id]) {
       // Got cleaned up entirely, somehow?
       logger.info("Connection ID", id, "was cleaned up entirely before last connection closed");
       return;
@@ -431,31 +405,29 @@ function logStats(id, stats) {
 
 if (require.main == module) {
   var ops = require('optimist')
-  .usage("Usage: $0 [--port 8050] [--host=localhost] [--log=filename] [--log-level=N]")
-  .describe("port", "The port to server on (default $HUB_SERVER_PORT, $PORT, $VCAP_APP_PORT, or 8050")
-    .describe("host", "The interface to serve on (default $HUB_SERVER_HOST, $HOST, $VCAP_APP_HOST, 127.0.0.1).  Use 0.0.0.0 to make it public")
-    .describe("log-level", "The level of logging to do, from 0 (very verbose) to 5 (nothing) (default $LOG_LEVEL or 0)")
-    .describe("log", "A file to log to (default $LOG_FILE or stdout)")
-    .describe("stdout", "Log to both stdout and the log file");
-    var port = ops.argv.port || process.env.HUB_SERVER_PORT || process.env.VCAP_APP_PORT ||
-    process.env.PORT || 8050;
-    var host = ops.argv.host || process.env.HUB_SERVER_HOST || process.env.VCAP_APP_HOST ||
-    process.env.HOST || '127.0.0.1';
-    var logLevel = process.env.LOG_LEVEL || 0;
-    var logFile = process.env.LOG_FILE || ops.argv.log;
-    var stdout = ops.argv.stdout || !logFile;
-    if (ops.argv['log-level']) {
-      logLevel = parseInt(ops.argv['log-level'], 10);
-    }
-    logger = new Logger(logLevel, logFile, stdout);
-    if (ops.argv.h || ops.argv.help) {
-      console.log(ops.help());
-      process.exit();
-    } else {
-      startServer(port, host);
-    }
+      .usage("Usage: $0 [--port 8080] [--host=localhost] [--log=filename] [--log-level=N]")
+      .describe("port", "The port to server on (default $HUB_SERVER_PORT, $PORT, $VCAP_APP_PORT, or 8080")
+      .describe("host", "The interface to serve on (default $HUB_SERVER_HOST, $HOST, $VCAP_APP_HOST, 127.0.0.1).  Use 0.0.0.0 to make it public")
+      .describe("log-level", "The level of logging to do, from 0 (very verbose) to 5 (nothing) (default $LOG_LEVEL or 0)")
+      .describe("log", "A file to log to (default $LOG_FILE or stdout)")
+      .describe("stdout", "Log to both stdout and the log file");
+  var port = ops.argv.port || process.env.HUB_SERVER_PORT || process.env.VCAP_APP_PORT ||
+      process.env.PORT || 8080;
+  var host = ops.argv.host || process.env.HUB_SERVER_HOST || process.env.VCAP_APP_HOST ||
+      process.env.HOST || '127.0.0.1';
+  var logLevel = process.env.LOG_LEVEL || 0;
+  var logFile = process.env.LOG_FILE || ops.argv.log;
+  var stdout = ops.argv.stdout || !logFile;
+  if (ops.argv['log-level']) {
+    logLevel = parseInt(ops.argv['log-level'], 10);
   }
+  logger = new Logger(logLevel, logFile, stdout);
+  if (ops.argv.h || ops.argv.help) {
+    console.log(ops.help());
+    process.exit();
+  } else {
+    startServer(port, host);
+  }
+}
 
-
-  console.log('whatever outermost1');
-  exports.startServer = startServer;
+exports.startServer = startServer;
