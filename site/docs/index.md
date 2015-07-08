@@ -138,7 +138,7 @@ The other way to set a variable *after* TogetherJS is loaded is `TogetherJS.conf
     Contains a list of all the messages that will be ignored when console logging. Defaults to the list ["cursor-update", "keydown", "scroll-update"]. Will ignore all messages if set to true.
 
 `TogetherJSConfig_ignoreForms`:
-    Contains a list of all the forms that will be ignored. Each item of the list is a jQuery selector matching the form element to be ignored. Defaults to [":password"]. Will ignore all forms if set to true.
+    Contains a list of all the forms that will be ignored, defaults to [":password"]. Will ignore all forms if set to true.
 
 There are additional hooks you can configure, which are described in [Extending TogetherJS](#extending-togetherjs).
 
@@ -184,7 +184,7 @@ While [configuration](#configuring-togetherjs) covers some of what you can do to
 
 ### Configuring events
 
-Like other configuration, you can configure the event handlers and hooks we describe before `togetherjs(-min).js` is loaded.  Event handlers are just a smidge different.  You'd normally add event handler like `TogetherJS.on("ready", function () {...})`.  To do it as configuration:
+Like other configuration, you can configure the event handlers and hooks we describe before `togetherjs(-min).js` is loaded.  Event handlers are just a smidge different.  You'd normally add even handler like `TogetherJS.on("ready", function () {...})`.  To do it as configuration:
 
 ```js
 TogetherJSConfig_on = {
@@ -460,20 +460,6 @@ TogetherJSConfig_hubBase = "https://myhub.com";
 
 If you are curious about the exact version of code on the server it should be always be [server.js on master](https://github.com/mozilla/togetherjs/blob/master/hub/server.js), and you can double-check by fetching [`/server-source`](https://hub.togetherjs.com/server-source).
 
-### Deploying the hub server to Heroku
-
-You need a Heroku account. If you don't have one, their [Node.js getting started guide](https://devcenter.heroku.com/articles/getting-started-with-nodejs) is a good place to start.
-
-What's about to happen: we clone the repo and create a new Heroku app within it. We need to set the HOST environment variable to get the app to bind to 0.0.0.0 instead of 127.0.0.1. It'll pick up the PORT variable automatically. We also need to enable WebSockets for the app. Then, push the code and we should be good to go!
-
-	git clone git@github.com:mozilla/togetherjs.git
-	cd togetherjs
-	heroku create
-	heroku config:add HOST=0.0.0.0
-	git push heroku master
-
-Make note of the app name after running `heroku create` You can check that everything is running by going to http://your-app-name-here.herokuapp.com/status
-
 ## Addons
 
 There is an addon for Firefox in [addon/](https://github.com/mozilla/togetherjs/tree/develop/addon).
@@ -487,6 +473,22 @@ A simple way to install is simply to [click this link](https://togetherjs.com/to
 ### Building
 
 You can build the addon using the [Addon-SDK](https://addons.mozilla.org/en-US/developers/builder). Once you've installed the SDK, go into the `addon/` directory and run `cfx xpi` to create an XPI (packaged addon file) or `cfx run` to start up Firefox with the addon installed (for development).
+
+## Deploying the hub server to Heroku
+
+You need a Heroku account. If you don't have one, their [Node.js getting started guide](https://devcenter.heroku.com/articles/getting-started-with-nodejs) is a good place to start.
+
+What's about to happen: we clone the repo and create a new Heroku app within it. We need to set the HOST environment variable to get the app to bind to 0.0.0.0 instead of 127.0.0.1. It'll pick up the PORT variable automatically. We also need to enable WebSockets for the app. Then, push the code and we should be good to go!
+
+	git clone git@github.com:mozilla/togetherjs.git
+	cd togetherjs
+	heroku create
+	heroku config:add HOST=0.0.0.0
+	heroku labs:enable websockets
+	git push heroku master
+
+Make note of the app name after running `heroku create` You can check that everything is running by going to http://your-app-name-here.herokuapp.com/status
+
 
 ## Getting Help
 
