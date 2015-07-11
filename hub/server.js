@@ -299,6 +299,7 @@ wsServer.on('request', function(request) {
         new_msg.clientId = parsed.clientId;
         new_msg.topic = parsed.topic;
         new_msg.username = parsed.username;
+        new_msg.avatarname = parsed.avatarname;
         new_msg.save(function(err){
           if(err) throw err;
           else console.log('sucessfully saved chat!');
