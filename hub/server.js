@@ -438,9 +438,9 @@ if (require.main == module) {
     .describe("log", "A file to log to (default $LOG_FILE or stdout)")
     .describe("stdout", "Log to both stdout and the log file");
     var port = ops.argv.port || process.env.HUB_SERVER_PORT || process.env.VCAP_APP_PORT ||
-    process.env.PORT || 8050;
+    process.env.PORT || 8081;
     var host = ops.argv.host || process.env.HUB_SERVER_HOST || process.env.VCAP_APP_HOST ||
-    process.env.HOST || '127.0.0.1';
+    process.env.HOST || '0.0.0.0';
     var logLevel = process.env.LOG_LEVEL || 0;
     var logFile = process.env.LOG_FILE || ops.argv.log;
     var stdout = ops.argv.stdout || !logFile;
