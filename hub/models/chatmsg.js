@@ -5,7 +5,7 @@ var chatmsgSchema = mongoose.Schema({
   topic: String,
   text: String,
   username: String,
-  // msgID: String,
+  avatarname: String,
   time:  { type : Date, default: Date.now }
 }, {collection:"chatmsg"});
 

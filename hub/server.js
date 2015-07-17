@@ -295,7 +295,6 @@ wsServer.on('request', function(request) {
         console.log('this is when message.utf8Data is chat type');
         var new_msg = new Chatmsg();
         new_msg.text = parsed.text;
-        // new_msg._id = parsed.messageId;
         new_msg.clientId = parsed.clientId;
         new_msg.topic = parsed.topic;
         new_msg.username = parsed.username;
