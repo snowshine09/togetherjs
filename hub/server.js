@@ -6,7 +6,8 @@
  mongoose = require('mongoose');
  // mongoose.createConnection(configDB.url);
  // mongoose.connect(configDB.url);
- var Chatmsg = require('./models/chatmsg.js');
+ var Chatmsg = require('./models/chatmsg.js'),
+ UserAct = require('./models/useract.js');
 
 // New Relic Server monitoring support
 if ( process.env.NEW_RELIC_HOME ) {
@@ -304,6 +305,54 @@ wsServer.on('request', function(request) {
           else console.log('sucessfully saved chat!');
         });
         console.log('out of chat saving');
+      }
+      else if(parsed.type === "cursor-click") {
+        var newAct = new UserAct({
+          type: "cursor click",
+          username: parsed.username,
+          topic: parsed.topic,
+          content: {
+            clicked: parsed.element
+          }
+        });
+        newAct.save(function(err,nact){
+          if(err){
+            console.err(err);
+            console.log("err occurs when saving new user act");
+          }
+          console.log("new useract added");
+        });
+      }
+      else if (parsed.type === "scroll-update") {
+        var newAct = new UserAct({
+          type: "cursor click",
+          username: parsed.username,
+          topic: parsed.topic,
+          content: {
+            clicked: parsed.element
+          }
+        });
+        newAct.save(function(err,nact){
+          if(err){
+            console.err(err);
+            console.log("err occurs when saving new user act");
+          }
+          console.log("new useract added");
+        });
+      }
+      else if (parsed.type ==="idle-status") {
+        var newAct = new UserAct({
+          type: "Idle status",
+          username: parsed.username,
+          topic: parsed.topic
+        });
+        newAct.save(function(err,nact){
+          if(err){
+            console.err(err);
+            console.log("err occurs when saving new user act");
+          }
+          console.log("new useract added");
+        });
       }
       // logger.warn('try sending somthing using logger '+message.utf8Data);
       // console.log('now console'+message[0]);
